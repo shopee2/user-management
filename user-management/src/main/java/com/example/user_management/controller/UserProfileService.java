@@ -37,6 +37,31 @@ import com.google.gson.Gson;
 @RestController
 public class UserProfileService {
 	
+	@RequestMapping(value = "/profile/all", method = RequestMethod.GET)
+	public ResponseEntity<String> getAllUserProfile() throws InterruptedException, ExecutionException {
+
+		CollectionReference ref = App.db.collection("userProfile");
+		ApiFuture<QuerySnapshot> querySnapshot = ref.get();
+		
+		List<UserProfile> arr = new ArrayList<UserProfile>();
+
+		for (DocumentSnapshot document : querySnapshot.get().getDocuments()) {
+			UserProfile profile = new UserProfile();
+			profile.setUid(document.get("uid").toString());
+			profile.setFirstName(document.get("firstName").toString());
+			profile.setLastName(document.get("lastName").toString());
+			profile.setAddress(document.get("address").toString());
+			profile.setAge(document.get("age").toString());
+			profile.setGender(document.get("gender").toString());
+			profile.setPhoneNumber(document.get("phoneNumber").toString());
+			
+			arr.add(profile);
+			
+		}
+
+		return new ResponseEntity<String>(new Gson().toJson(arr), HttpStatus.OK);
+	}
+	
 	@RequestMapping(value = "/profile/{uid}", method = RequestMethod.GET)
 	public ResponseEntity<String> getUserProfile(@PathVariable String uid) throws InterruptedException, ExecutionException {
 

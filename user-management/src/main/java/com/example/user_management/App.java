@@ -24,7 +24,7 @@ import com.google.firebase.cloud.StorageClient;
 public class App {
 	
 	public static Firestore db;
-	//public static Storage storage;
+	public static Bucket storage;
 	
     public static void main( String[] args ) {
     	
@@ -48,6 +48,6 @@ public class App {
 
 		FirebaseApp.initializeApp(options);
 		db = FirestoreClient.getFirestore();
-		//storage = StorageClient.getInstance().bucket().getStorage();
+		storage = StorageClient.getInstance().bucket();
 	}
 }
