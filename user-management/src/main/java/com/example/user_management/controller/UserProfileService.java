@@ -152,8 +152,9 @@ public class UserProfileService {
 
 			return new ResponseEntity<String>(new Gson().toJson(errors), HttpStatus.BAD_REQUEST);
 		}
-
-		Query query = this.ref.whereEqualTo("uid", userProfile.getUid());
+		
+		String uid = userProfile.getUid();
+		Query query = this.ref.whereEqualTo("uid", uid);
 		ApiFuture<QuerySnapshot> querySnapshot = query.get();
 
 		List<QueryDocumentSnapshot> documents;
