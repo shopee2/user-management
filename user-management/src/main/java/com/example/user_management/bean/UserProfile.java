@@ -22,8 +22,18 @@ public class UserProfile {
 	@NotNull(message = "gender should not be null")
 	private String gender;
 	
-	@NotNull(message = "age should not be null")
-	private String age;
+	@NotNull(message = "dateOfBirth should not be null")
+	private DateOfBirth dateOfBirth;
+	
+	public UserProfile(String uid, String firstName, String lastName, String address, String phoneNumber, String gender, DateOfBirth dateOfBirth) {
+		this.uid = uid;
+		this.firstName = firstName;
+		this.lastName = lastName;
+		this.address = address;
+		this.phoneNumber = phoneNumber;
+		this.gender = gender;
+		this.dateOfBirth = dateOfBirth;
+	}
 
 	
 	public String getUid() {
@@ -34,12 +44,12 @@ public class UserProfile {
 		this.uid = uid;
 	}
 
-	public String getAge() {
-		return age;
+	public DateOfBirth getDateOfBirth() {
+		return dateOfBirth;
 	}
 
-	public void setAge(String age) {
-		this.age = age;
+	public void setDateOfBirth(DateOfBirth dateOfBirth) {
+		this.dateOfBirth = dateOfBirth;
 	}
 
 	public String getFirstName() {

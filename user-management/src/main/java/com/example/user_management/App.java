@@ -22,30 +22,27 @@ import com.google.firebase.cloud.StorageClient;
 @SpringBootApplication
 @EnableDiscoveryClient
 public class App {
-	
+
 	public static Firestore db;
 	public static Bucket storage;
-	
-    public static void main( String[] args ) {
-    	
-    	try {
+
+	public static void main(String[] args) {
+		try {
 			initDB();
+			SpringApplication.run(App.class, args);
 		} catch (IOException error) {
 			System.out.println(error);
 		}
-    	
-        SpringApplication.run(App.class, args);
-    }
-    
-    @SuppressWarnings("deprecation")
+	}
+
+	@SuppressWarnings("deprecation")
 	public static void initDB() throws IOException {
 		ClassLoader classLoader = App.class.getClassLoader();
 		File configFile = new File(classLoader.getResource("firebase-adminsdk.json").getFile());
 		InputStream serviceAccount = new FileInputStream(configFile);
-
 		GoogleCredentials credentials = GoogleCredentials.fromStream(serviceAccount);
-		FirebaseOptions options = new FirebaseOptions.Builder().setCredentials(credentials).setStorageBucket("sop-user-management.appspot.com").build();
-
+		FirebaseOptions options = new FirebaseOptions.Builder().setCredentials(credentials)
+				.setStorageBucket("sop-user-management.appspot.com").build();
 		FirebaseApp.initializeApp(options);
 		db = FirestoreClient.getFirestore();
 		storage = StorageClient.getInstance().bucket();

@@ -1,12 +1,7 @@
 package com.example.user_management.controller;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import javax.validation.Valid;
 
@@ -21,85 +16,109 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.user_management.App;
+import com.example.user_management.bean.DateOfBirth;
 import com.example.user_management.bean.UserProfile;
 import com.google.api.core.ApiFuture;
-import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.firestore.CollectionReference;
 import com.google.cloud.firestore.DocumentSnapshot;
-import com.google.cloud.firestore.Firestore;
 import com.google.cloud.firestore.Query;
+import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
-import com.google.firebase.FirebaseApp;
-import com.google.firebase.FirebaseOptions;
-import com.google.firebase.cloud.FirestoreClient;
 import com.google.gson.Gson;
 
 @RestController
 public class UserProfileService {
-	
-	@RequestMapping(value = "/profile/all", method = RequestMethod.GET)
-	public ResponseEntity<String> getAllUserProfile() throws InterruptedException, ExecutionException {
 
-		CollectionReference ref = App.db.collection("userProfile");
-		ApiFuture<QuerySnapshot> querySnapshot = ref.get();
-		
+	private CollectionReference ref;
+
+	public UserProfileService() {
+		this.ref = App.db.collection("userProfile");
+	}
+
+	@RequestMapping(value = "/profile/all", method = RequestMethod.GET)
+	public ResponseEntity<String> getAllUserProfile() {
+
+		ApiFuture<QuerySnapshot> querySnapshot = this.ref.get();
+
 		List<UserProfile> arr = new ArrayList<UserProfile>();
 
-		for (DocumentSnapshot document : querySnapshot.get().getDocuments()) {
-			UserProfile profile = new UserProfile();
-			profile.setUid(document.get("uid").toString());
-			profile.setFirstName(document.get("firstName").toString());
-			profile.setLastName(document.get("lastName").toString());
-			profile.setAddress(document.get("address").toString());
-			profile.setAge(document.get("age").toString());
-			profile.setGender(document.get("gender").toString());
-			profile.setPhoneNumber(document.get("phoneNumber").toString());
-			
+		List<QueryDocumentSnapshot> documents;
+		try {
+			documents = querySnapshot.get().getDocuments();
+		} catch (Exception error) {
+			return new ResponseEntity<String>(error.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+		if (documents.size() == 1) {
+			DocumentSnapshot document = documents.get(0);
+			String uid = document.get("uid").toString();
+			String firstName = document.get("firstName").toString();
+			String lastName = document.get("lastName").toString();
+			String address = document.get("address").toString();
+			String phoneNumber = document.get("phoneNumber").toString();
+			String gender = document.get("gender").toString();
+			DateOfBirth dateOfBirth = new Gson().fromJson(document.get("dateOfBirth").toString(), DateOfBirth.class);
+
+			UserProfile profile = new UserProfile(uid, firstName, lastName, address, phoneNumber, gender, dateOfBirth);
+
 			arr.add(profile);
-			
+
 		}
 
 		return new ResponseEntity<String>(new Gson().toJson(arr), HttpStatus.OK);
 	}
-	
-	@RequestMapping(value = "/profile/{uid}", method = RequestMethod.GET)
-	public ResponseEntity<String> getUserProfile(@PathVariable String uid) throws InterruptedException, ExecutionException {
 
-		CollectionReference ref = App.db.collection("userProfile");
-		Query query = ref.whereEqualTo("uid", uid);
+	@RequestMapping(value = "/profile/{uid}", method = RequestMethod.GET)
+	public ResponseEntity<String> getUserProfile(@PathVariable String uid) {
+
+		Query query = this.ref.whereEqualTo("uid", uid);
 		ApiFuture<QuerySnapshot> querySnapshot = query.get();
 
-		for (DocumentSnapshot document : querySnapshot.get().getDocuments()) {
-			UserProfile profile = new UserProfile();
-			profile.setUid(document.get("uid").toString());
-			profile.setFirstName(document.get("firstName").toString());
-			profile.setLastName(document.get("lastName").toString());
-			profile.setAddress(document.get("address").toString());
-			profile.setAge(document.get("age").toString());
-			profile.setGender(document.get("gender").toString());
-			profile.setPhoneNumber(document.get("phoneNumber").toString());
-			
-			return new ResponseEntity<String>(new Gson().toJson(profile), HttpStatus.OK);
+		List<QueryDocumentSnapshot> documents;
+		try {
+			documents = querySnapshot.get().getDocuments();
+		} catch (Exception error) {
+			return new ResponseEntity<String>(error.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
-		return new ResponseEntity<String>(new Gson().toJson("userProfile not found"), HttpStatus.NOT_FOUND);
+		if (documents.size() == 1) {
+			DocumentSnapshot document = documents.get(0);
+			String firstName = document.get("firstName").toString();
+			String lastName = document.get("lastName").toString();
+			String address = document.get("address").toString();
+			String phoneNumber = document.get("phoneNumber").toString();
+			String gender = document.get("gender").toString();
+			DateOfBirth dateOfBirth = new Gson().fromJson(document.get("dateOfBirth").toString(), DateOfBirth.class);
+
+			UserProfile profile = new UserProfile(uid, firstName, lastName, address, phoneNumber, gender, dateOfBirth);
+
+			return new ResponseEntity<String>(new Gson().toJson(profile), HttpStatus.OK);
+
+		}
+
+		return new ResponseEntity<String>(new Gson().toJson("can't find user profile - " + uid), HttpStatus.NOT_FOUND);
 	}
 
 	@RequestMapping(value = "/profile/{uid}", method = RequestMethod.DELETE)
-	public ResponseEntity<String> deleteUserProfile(@PathVariable String uid) throws InterruptedException, ExecutionException {
-		
-		CollectionReference ref = App.db.collection("userProfile");
-		Query query = ref.whereEqualTo("uid", uid);
+	public ResponseEntity<String> deleteUserProfile(@PathVariable String uid) {
+
+		Query query = this.ref.whereEqualTo("uid", uid);
 		ApiFuture<QuerySnapshot> querySnapshot = query.get();
 
-		for (DocumentSnapshot document : querySnapshot.get().getDocuments()) {
-			App.db.collection("userProfile").document(document.getId()).delete();
-			return new ResponseEntity<String>(HttpStatus.OK);
+		List<QueryDocumentSnapshot> documents;
+		try {
+			documents = querySnapshot.get().getDocuments();
+		} catch (Exception error) {
+			return new ResponseEntity<String>(error.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		
-		
-		
-		return new ResponseEntity<String>(new Gson().toJson("userProfile not found"), HttpStatus.NOT_FOUND);
+
+		if (documents.size() == 1) {
+			App.db.collection("userProfile").document(documents.get(0).getId()).delete();
+			return new ResponseEntity<String>(HttpStatus.OK);
+
+		}
+
+		return new ResponseEntity<String>(new Gson().toJson("can't find user profile - " + uid), HttpStatus.NOT_FOUND);
 	}
 
 	@RequestMapping(value = "/profile/create", method = RequestMethod.POST)
@@ -116,16 +135,14 @@ public class UserProfileService {
 			return new ResponseEntity<String>(new Gson().toJson(errors), HttpStatus.BAD_REQUEST);
 		}
 
-		CollectionReference ref = App.db.collection("userProfile");
-		ref.add(userProfile);
+		this.ref.add(userProfile);
 		return new ResponseEntity<String>(new Gson().toJson(userProfile), HttpStatus.CREATED);
 	}
 
-	
 	@RequestMapping(value = "/profile/edit", method = RequestMethod.PATCH)
 	public ResponseEntity<String> editUserProfile(@Valid @RequestBody UserProfile userProfile,
-			BindingResult bindingResult) throws InterruptedException, ExecutionException {
-		
+			BindingResult bindingResult) {
+
 		if (bindingResult.hasErrors()) {
 			List<String> errors = new ArrayList<String>();
 
@@ -135,19 +152,24 @@ public class UserProfileService {
 
 			return new ResponseEntity<String>(new Gson().toJson(errors), HttpStatus.BAD_REQUEST);
 		}
-		
-		CollectionReference ref = App.db.collection("userProfile");
-		Query query = ref.whereEqualTo("uid", userProfile.getUid());
+
+		Query query = this.ref.whereEqualTo("uid", userProfile.getUid());
 		ApiFuture<QuerySnapshot> querySnapshot = query.get();
-		
-		if (querySnapshot.get().getDocuments().size() == 1) {
-			
-			ref.document(querySnapshot.get().getDocuments().get(0).getId()).set(userProfile);
+
+		List<QueryDocumentSnapshot> documents;
+		try {
+			documents = querySnapshot.get().getDocuments();
+		} catch (Exception error) {
+			return new ResponseEntity<String>(error.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+		if (documents.size() == 1) {
+
+			this.ref.document(documents.get(0).getId()).set(userProfile);
 			return new ResponseEntity<String>(new Gson().toJson(userProfile), HttpStatus.OK);
 		}
 
-
-		return new ResponseEntity<String>(new Gson().toJson("userProfile not found"), HttpStatus.NOT_FOUND);
+		return new ResponseEntity<String>(new Gson().toJson("can't find user profile - " + uid), HttpStatus.NOT_FOUND);
 	}
 
 }
