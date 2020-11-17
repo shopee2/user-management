@@ -24,6 +24,7 @@ import com.google.cloud.firestore.DocumentSnapshot;
 import com.google.cloud.firestore.Query;
 import com.google.cloud.firestore.QueryDocumentSnapshot;
 import com.google.cloud.firestore.QuerySnapshot;
+import com.google.cloud.storage.Blob;
 import com.google.gson.Gson;
 
 @RestController
@@ -49,8 +50,7 @@ public class UserProfileService {
 			return new ResponseEntity<String>(error.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 
-		if (documents.size() == 1) {
-			DocumentSnapshot document = documents.get(0);
+		for (DocumentSnapshot document : documents) {
 			String uid = document.get("uid").toString();
 			String firstName = document.get("firstName").toString();
 			String lastName = document.get("lastName").toString();
@@ -114,7 +114,15 @@ public class UserProfileService {
 
 		if (documents.size() == 1) {
 			App.db.collection("userProfile").document(documents.get(0).getId()).delete();
-			return new ResponseEntity<String>(HttpStatus.OK);
+
+			// also delete profile picture
+			Blob picture = App.storage.get(uid);
+
+			if (picture != null) {
+				App.storage.getStorage().delete(picture.getBlobId());
+			}
+
+			return new ResponseEntity<String>(new Gson().toJson("successful operation"), HttpStatus.OK);
 
 		}
 
@@ -134,7 +142,23 @@ public class UserProfileService {
 
 			return new ResponseEntity<String>(new Gson().toJson(errors), HttpStatus.BAD_REQUEST);
 		}
+		
+		String uid = userProfile.getUid();
+		Query query = this.ref.whereEqualTo("uid", uid);
+		ApiFuture<QuerySnapshot> querySnapshot = query.get();
+		
+		List<QueryDocumentSnapshot> documents;
+		try {
+			documents = querySnapshot.get().getDocuments();
+		} catch (Exception error) {
+			return new ResponseEntity<String>(error.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 
+		if (documents.size() == 1) {
+			// already exist
+			return new ResponseEntity<String>("user profile of "+ uid + " already exist", HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		
 		this.ref.add(userProfile);
 		return new ResponseEntity<String>(new Gson().toJson(userProfile), HttpStatus.CREATED);
 	}
@@ -152,7 +176,7 @@ public class UserProfileService {
 
 			return new ResponseEntity<String>(new Gson().toJson(errors), HttpStatus.BAD_REQUEST);
 		}
-		
+
 		String uid = userProfile.getUid();
 		Query query = this.ref.whereEqualTo("uid", uid);
 		ApiFuture<QuerySnapshot> querySnapshot = query.get();

@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.example.user_management.App;
@@ -20,6 +21,7 @@ import com.google.cloud.firestore.QuerySnapshot;
 import com.google.cloud.storage.Blob;
 import com.google.gson.Gson;
 
+@RestController
 public class UserProfilePictureService {
 
 	private CollectionReference ref;
@@ -72,6 +74,14 @@ public class UserProfilePictureService {
 		}
 
 		if (documents.size() == 1) {
+			
+			Blob picture = App.storage.get(uid);
+
+			if (picture == null) {
+				return new ResponseEntity<String>(new Gson().toJson("This user(" + uid + ") doesn't have a profile picture."),
+						HttpStatus.NOT_FOUND);
+			}
+			
 			UserProfilePicture profilePicture = new UserProfilePicture(uid, this.storageURL + uid);
 			return new ResponseEntity<String>(new Gson().toJson(profilePicture), HttpStatus.OK);
 		}
@@ -96,7 +106,7 @@ public class UserProfilePictureService {
 
 			Blob picture = App.storage.get(uid);
 
-			if (!picture.exists()) {
+			if (picture == null) {
 				return new ResponseEntity<String>(new Gson().toJson("This user(" + uid + ") doesn't have a profile picture."),
 						HttpStatus.NOT_FOUND);
 			}

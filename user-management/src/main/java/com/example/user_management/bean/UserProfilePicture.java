@@ -9,6 +9,10 @@ public class UserProfilePicture {
 	@NotNull(message = "imageUrl should not be null")
 	private String imageUrl;
 
+	public UserProfilePicture() {
+		super();
+	}
+	
 	public UserProfilePicture(String uid, String imageUrl) {
 		this.uid = uid;
 		this.imageUrl = imageUrl;
