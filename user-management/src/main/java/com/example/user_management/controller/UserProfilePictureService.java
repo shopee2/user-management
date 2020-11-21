@@ -3,6 +3,7 @@ package com.example.user_management.controller;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,7 +32,7 @@ public class UserProfilePictureService {
 		this.ref = App.db.collection("userProfile");
 	}
 
-	@RequestMapping(value = "/profile/picture/{uid}", method = RequestMethod.POST)
+	@RequestMapping(value = "/profile/picture/{uid}", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<String> createOrEditUserProfilePicture(@PathVariable String uid,
 			@RequestParam("file") MultipartFile file) {
 
@@ -60,7 +61,7 @@ public class UserProfilePictureService {
 		return new ResponseEntity<String>(new Gson().toJson("can't find user profile - " + uid), HttpStatus.NOT_FOUND);
 	}
 
-	@RequestMapping(value = "/profile/picture/{uid}", method = RequestMethod.GET)
+	@RequestMapping(value = "/profile/picture/{uid}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<String> getUserProfilePicture(@PathVariable String uid) {
 
 		Query query = this.ref.whereEqualTo("uid", uid);
@@ -89,7 +90,7 @@ public class UserProfilePictureService {
 		return new ResponseEntity<String>(new Gson().toJson("can't find user profile - " + uid), HttpStatus.NOT_FOUND);
 	}
 
-	@RequestMapping(value = "/profile/picture/{uid}", method = RequestMethod.DELETE)
+	@RequestMapping(value = "/profile/picture/{uid}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<String> deleteUserProfile(@PathVariable String uid) {
 
 		Query query = this.ref.whereEqualTo("uid", uid);

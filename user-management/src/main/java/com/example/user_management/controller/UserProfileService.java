@@ -7,6 +7,7 @@ import javax.validation.Valid;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -36,7 +37,7 @@ public class UserProfileService {
 		this.ref = App.db.collection("userProfile");
 	}
 
-	@RequestMapping(value = "/profile/all", method = RequestMethod.GET)
+	@RequestMapping(value = "/profile/all", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<String> getAllUserProfile() {
 
 		ApiFuture<QuerySnapshot> querySnapshot = this.ref.get();
@@ -68,7 +69,7 @@ public class UserProfileService {
 		return new ResponseEntity<String>(new Gson().toJson(arr), HttpStatus.OK);
 	}
 
-	@RequestMapping(value = "/profile/{uid}", method = RequestMethod.GET)
+	@RequestMapping(value = "/profile/{uid}", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<String> getUserProfile(@PathVariable String uid) {
 
 		Query query = this.ref.whereEqualTo("uid", uid);
@@ -99,7 +100,7 @@ public class UserProfileService {
 		return new ResponseEntity<String>(new Gson().toJson("can't find user profile - " + uid), HttpStatus.NOT_FOUND);
 	}
 
-	@RequestMapping(value = "/profile/{uid}", method = RequestMethod.DELETE)
+	@RequestMapping(value = "/profile/{uid}", method = RequestMethod.DELETE, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<String> deleteUserProfile(@PathVariable String uid) {
 
 		Query query = this.ref.whereEqualTo("uid", uid);
@@ -129,7 +130,7 @@ public class UserProfileService {
 		return new ResponseEntity<String>(new Gson().toJson("can't find user profile - " + uid), HttpStatus.NOT_FOUND);
 	}
 
-	@RequestMapping(value = "/profile/create", method = RequestMethod.POST)
+	@RequestMapping(value = "/profile/create", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<String> createUserProfile(@Valid @RequestBody UserProfile userProfile,
 			BindingResult bindingResult) {
 
@@ -142,11 +143,11 @@ public class UserProfileService {
 
 			return new ResponseEntity<String>(new Gson().toJson(errors), HttpStatus.BAD_REQUEST);
 		}
-		
+
 		String uid = userProfile.getUid();
 		Query query = this.ref.whereEqualTo("uid", uid);
 		ApiFuture<QuerySnapshot> querySnapshot = query.get();
-		
+
 		List<QueryDocumentSnapshot> documents;
 		try {
 			documents = querySnapshot.get().getDocuments();
@@ -156,14 +157,15 @@ public class UserProfileService {
 
 		if (documents.size() == 1) {
 			// already exist
-			return new ResponseEntity<String>("user profile of "+ uid + " already exist", HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<String>("user profile of " + uid + " already exist",
+					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		
+
 		this.ref.add(userProfile);
 		return new ResponseEntity<String>(new Gson().toJson(userProfile), HttpStatus.CREATED);
 	}
 
-	@RequestMapping(value = "/profile/edit", method = RequestMethod.PATCH)
+	@RequestMapping(value = "/profile/edit", method = RequestMethod.PATCH, produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<String> editUserProfile(@Valid @RequestBody UserProfile userProfile,
 			BindingResult bindingResult) {
 
