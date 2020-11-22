@@ -1,6 +1,7 @@
 package com.example.user_management.controller;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -54,7 +55,7 @@ public class UserProfilePictureService {
 				return new ResponseEntity<String>(error.toString(), HttpStatus.INTERNAL_SERVER_ERROR);
 			}
 
-			UserProfilePicture profilePicture = new UserProfilePicture(uid, this.storageURL + uid);
+			UserProfilePicture profilePicture = new UserProfilePicture(uid, this.storageURL + uid + "?avoidCache=" + UUID.randomUUID().toString());
 			return new ResponseEntity<String>(new Gson().toJson(profilePicture), HttpStatus.CREATED);
 		}
 
@@ -75,15 +76,17 @@ public class UserProfilePictureService {
 		}
 
 		if (documents.size() == 1) {
-			
+
 			Blob picture = App.storage.get(uid);
 
 			if (picture == null) {
-				return new ResponseEntity<String>(new Gson().toJson("This user(" + uid + ") doesn't have a profile picture."),
+				return new ResponseEntity<String>(
+						new Gson().toJson("This user(" + uid + ") doesn't have a profile picture."),
 						HttpStatus.NOT_FOUND);
 			}
-			
-			UserProfilePicture profilePicture = new UserProfilePicture(uid, this.storageURL + uid);
+
+			UserProfilePicture profilePicture = new UserProfilePicture(uid,
+					this.storageURL + uid + "?avoidCache=" + UUID.randomUUID().toString());
 			return new ResponseEntity<String>(new Gson().toJson(profilePicture), HttpStatus.OK);
 		}
 
@@ -108,7 +111,8 @@ public class UserProfilePictureService {
 			Blob picture = App.storage.get(uid);
 
 			if (picture == null) {
-				return new ResponseEntity<String>(new Gson().toJson("This user(" + uid + ") doesn't have a profile picture."),
+				return new ResponseEntity<String>(
+						new Gson().toJson("This user(" + uid + ") doesn't have a profile picture."),
 						HttpStatus.NOT_FOUND);
 			}
 

@@ -37,27 +37,27 @@ public class App {
 			System.out.println(error);
 		}
 	}
-	
+
 	@SuppressWarnings("deprecation")
 	@Bean
-    public WebMvcConfigurer corsConfigurer() {
-       return new WebMvcConfigurerAdapter() {
-          @Override
-          public void addCorsMappings(CorsRegistry registry) {
-             registry.addMapping("/**").allowedOrigins("*");
-          }
-       };
-    }
+	public WebMvcConfigurer corsConfigurer() {
+		return new WebMvcConfigurerAdapter() {
+			@Override
+			public void addCorsMappings(CorsRegistry registry) {
+				registry.addMapping("/**").allowedOrigins("*").allowedMethods("GET", "PUT", "POST", "PATCH", "DELETE");
+			}
+		};
+	}
 
 	@SuppressWarnings("deprecation")
 	public static void initDB() throws IOException {
-		
-		
-		//InputStream inputStream = resource.getInputStream();
-		
-		//ClassLoader classLoader = App.class.getClassLoader();
-		//File configFile = new File(classLoader.getResource("firebase-adminsdk.json").getFile());
-		//InputStream serviceAccount = new FileInputStream(configFile);
+
+		// InputStream inputStream = resource.getInputStream();
+
+		// ClassLoader classLoader = App.class.getClassLoader();
+		// File configFile = new
+		// File(classLoader.getResource("firebase-adminsdk.json").getFile());
+		// InputStream serviceAccount = new FileInputStream(configFile);
 		ClassPathResource resource = new ClassPathResource("firebase-adminsdk.json");
 		InputStream serviceAccount = resource.getInputStream();
 		GoogleCredentials credentials = GoogleCredentials.fromStream(serviceAccount);
