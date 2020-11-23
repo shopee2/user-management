@@ -1,7 +1,5 @@
 package com.example.user_management;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -22,6 +20,7 @@ import com.google.firebase.FirebaseOptions;
 import com.google.firebase.cloud.FirestoreClient;
 import com.google.firebase.cloud.StorageClient;
 
+@SuppressWarnings("deprecation")
 @SpringBootApplication
 @EnableDiscoveryClient
 public class App {
@@ -38,7 +37,6 @@ public class App {
 		}
 	}
 
-	@SuppressWarnings("deprecation")
 	@Bean
 	public WebMvcConfigurer corsConfigurer() {
 		return new WebMvcConfigurerAdapter() {
@@ -49,15 +47,8 @@ public class App {
 		};
 	}
 
-	@SuppressWarnings("deprecation")
 	public static void initDB() throws IOException {
 
-		// InputStream inputStream = resource.getInputStream();
-
-		// ClassLoader classLoader = App.class.getClassLoader();
-		// File configFile = new
-		// File(classLoader.getResource("firebase-adminsdk.json").getFile());
-		// InputStream serviceAccount = new FileInputStream(configFile);
 		ClassPathResource resource = new ClassPathResource("firebase-adminsdk.json");
 		InputStream serviceAccount = resource.getInputStream();
 		GoogleCredentials credentials = GoogleCredentials.fromStream(serviceAccount);
